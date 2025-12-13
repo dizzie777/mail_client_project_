@@ -1,152 +1,121 @@
-// импорт
-const express = require('express');
-const cors = require('cors');
-
-// созд экземпляр експрес
-const app = express();
-const PORT = 3000;
-
-// мидлвар
-app.use(cors());
-app.use(express.json());
-
-// тест данные
-const mockLetters = [
-    {
-        id: 1,
-        folder: 'inbox',
-        from: 'teacher@college.ru',
-        to: 'student@college.ru',
-        subject: 'добро пожаловать на практику',
-        body: 'сегодня начинаем разработку почтового клиента. удачи!))',
-        date: '2024-05-21 09:00',
-        is_read: false
-    },
-    {
-        id: 2,
-        folder: 'inbox',
-        from: 'admin@college.ru',
-        to: 'student@college.ru',
-        subject: 'техническое задание',
-        body: 'проектируем API для работы с письмами.',
-        date: '2024-05-21 10:30',
-        is_read: true
-    },
-    {
-        id: 3,
-        folder: 'sent',
-        from: 'student@college.ru',
-        to: 'teacher@college.ru',
-        subject: 'вопрос по API',
-        body: 'как правильно настроить Express сервер?',
-        date: '2024-05-20 15:45',
-        is_read: true
-    }
-];
-
-//=====================АПИ ЭНДПОИНТЫ=========================
-
-// 1проверка сервера
-app.get('/', (req, res) => {
-    res.json({
-        message: 'почтовый клиент API работает!',
-        version: '1.0.0',
-        endpoints: [
-            'GET    /api/letters',
-            'GET    /api/letters/:id',
-            'POST    /api/letters',
-            'PATCH   /api/letters/:id',
-            'DELETE    /api/letters/:id'
-        ],
-        instruction: 'используйте Постман или браузер для тестирования'      
-    });
-});
-
-
-// 2получить все пиьсма
-app.get('/api/letters', (req, res) => {
-    console.log('запрос на получение всех писем');
-    res.json({
-        success: true,
-        count: mockLetters.length,
-        data: mockLetters
-    });
-
-});
-
-// 3получить письмо по айди
-app.get('/api/letters/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    console.log(`поиск письма с ID: ${id}`); // исправлено: косые кавычки
-
-    const letter = mockLetters.find(l => l.id === id);
-
-    if(letter) {
-        res.json({
-            success: true,
-            data: letter
-        });
-    } else {
-        res.status(404).json({
-            success: false,
-            error: 'письмо не найдено'
-        });
-    }
-});
-
-// 4новое письмо
-app.post('/api/letters', (req, res) => {
-    console.log('запрос на создание письма');
-    console.log('тело запроса:', req.body);
-
-    // создаем
-    const newLetter = {
-        id: mockLetters.length + 1,
-        folder: 'sent',
-        from: 'student@college.ru',
-        to: req.body.to || 'recipient@example.com',
-        subject: req.body.subject || 'без темы',
-        body: req.body.body || 'текст',
-        date: new Date().toISOString(),
-        is_read: true
-    };
-
-    res.status(201).json({
-        success: true,
-        message: 'письмо создано',
-        data: newLetter
-    });
-});
-
-// 5обновить пьсмо 
-app.patch('/api/letters/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    console.log(`✏️обновление письма ID: ${id}`); // исправлено: косые кавычки
-    console.log('данные для обновления:', req.body);
-
-    res.json({
-        success: true,
-        message: `письмо ${id} обновлено`, // исправлено: косые кавычки
-        updates: req.body
-    });
-});
-
-// 6удалить письмо 
-app.delete('/api/letters/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    console.log(`🗑️удаление письма ID: ${id}`); // исправлено: косые кавычки
-
-    res.json({
-        success: true,
-        message: `письмо ${id} удалено в корзину` // исправлено: косые кавычки
-    });
-});
-
-// ======================ЗАПУСК СЕРВЕРА======================
-app.listen(PORT, () => {
-    console.log(`🚀сервер запущен на http://localhost:${PORT}`); // исправлено: косые кавычки
-    console.log(`📊документация API: http://localhost:${PORT}/`); // исправлено: косые кавычки
-    console.log(`📨API писем: http://localhost:${PORT}/api/letters`); // исправлено: косые кавычки
-    console.log('==============================');
-    console.log('для остановки сервера нажмите Ctrl + C');
-});
+// backend/server.js 
+// ВЕРСИЯ С БАЗОЙ ДАННЫХ ИЗ DB BROWSER 
+const express = require('express'); 
+const cors = require('cors'); 
+const db = require('./db_simple.js'); // Подключаем наш модуль 
+const app = express(); 
+const PORT = 3000; 
+// Middleware 
+app.use(cors()); 
+app.use(express.json()); 
+// ========== API ENDPOINTS ========== 
+// 1. ГЛАВНАЯ СТРАНИЦА 
+app.get('/', (req, res) => { 
+res.json({ 
+message: '✉️Почтовый клиент с REAL базой данных', 
+version: '3.0', 
+status: 'работает', 
+database: 'SQLite + DB Browser', 
+instructions: 'Открывайте ссылки ниже в браузере', 
+endpoints: [ 
+'📩GET  /api/letters  - все письма из БД',
+'🔍GET  /api/letters/:id - письмо по номеру',
+'📊GET  /api/stats - статистика'
+]
+}); 
+}); 
+ 
+// 2. ВСЕ ПИСЬМА ИЗ БАЗЫ ДАННЫХ 
+app.get('/api/letters', (req, res) => { 
+console.log('📩Кто-то запросил все письма из БД'); 
+db.getAllLetters((error, letters) => { 
+if (error) { 
+            // Если ошибка БД 
+            res.status(500).json({ 
+                success: false, 
+                error: 'Не удалось прочитать базу данных', 
+                details: error.message 
+            }); 
+        } else { 
+            // Успех! Отправляем письма 
+            res.json({ 
+                success: true, 
+                message: `Найдено ${letters.length} писем`, 
+                count: letters.length, 
+                data: letters 
+            }); 
+        } 
+    }); 
+}); 
+ 
+// 3. ОДНО ПИСЬМО ПО ID 
+app.get('/api/letters/:id', (req, res) => { 
+    const id = req.params.id; 
+    console.log(`🔍Запрос письма с ID: ${id}`); 
+     
+    db.getLetterById(id, (error, letter) => { 
+        if (error) { 
+            res.status(500).json({ 
+                success: false, 
+                error: 'Ошибка базы данных' 
+            }); 
+        } else if (!letter) { 
+            // Письмо не найдено 
+            res.status(404).json({ 
+                success: false, 
+                error: `Письмо с ID ${id} не найдено в базе данных` 
+            }); 
+        } else { 
+            // Письмо найдено! 
+            res.json({ 
+                success: true, 
+                message: 'Письмо найдено', 
+                data: letter 
+            }); 
+        } 
+    }); 
+}); 
+ 
+// 4. СТАТИСТИКА (дополнительно) 
+app.get('/api/stats', (req, res) => { 
+    db.getAllLetters((error, letters) => { 
+        if (error) { 
+            res.status(500).json({ error: 'Ошибка БД' }); 
+        } else { 
+            const inbox = letters.filter(l => l.folder === ' Входящие ').length; 
+            const sent = letters.filter(l => l.folder === ' Отправленные ').length; 
+            const unread = letters.filter(l => l.is_read === 0).length; 
+             
+            res.json({ 
+                total: letters.length, 
+                inbox: inbox, 
+                sent: sent, 
+                unread: unread, 
+                message: `В базе ${letters.length} писем, ${unread} непрочитанных` 
+            }); 
+        } 
+    }); 
+}); 
+ 
+// 5. ЗАГЛУШКИ для других методов 
+app.post('/api/letters', (req, res) => { 
+    res.json({ 
+        success: true, 
+        message: 'POST будет работать в день 4', 
+        note: 'Сейчас данные только читаются из БД' 
+    }); 
+}); 
+ 
+// ========== ЗАПУСК СЕРВЕРА ========== 
+app.listen(PORT, () => { 
+    console.log('════════════════════════════════════'); 
+    console.log(`🚀Сервер запущен: http://localhost:${PORT}`); 
+    console.log('📊 База данных: SQLite (создана в DB Browser)'); 
+    console.log('📁 Файл БД: backend/database/mail.db'); 
+    console.log('════════════════════════════════════'); 
+    console.log('📋Что проверять в браузере:'); 
+    console.log('  1. http://localhost:3000/'); 
+    console.log('  2. http://localhost:3000/api/letters'); 
+    console.log('  3. http://localhost:3000/api/letters/1'); 
+    console.log('════════════════════════════════════'); 
+}); 

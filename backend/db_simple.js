@@ -48,5 +48,5 @@ db.close();
 // 3. Экспортируем функции для использования в server.js 
 module.exports = { 
 getAllLetters, 
-getLetterById 
+getLetterById
 };
