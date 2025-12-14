@@ -82,8 +82,8 @@ app.get('/api/stats', (req, res) => {
         if (error) { 
             res.status(500).json({ error: 'Ошибка БД' }); 
         } else { 
-            const inbox = letters.filter(l => l.folder === ' Входящие ').length; 
-            const sent = letters.filter(l => l.folder === ' Отправленные ').length; 
+            const inbox = letters.filter(l => l.folder === 'Входящие').length; 
+            const sent = letters.filter(l => l.folder === 'Отправленные').length; 
             const unread = letters.filter(l => l.is_read === 0).length; 
              
             res.json({ 
