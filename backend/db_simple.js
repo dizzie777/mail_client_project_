@@ -144,7 +144,7 @@ function deleteLetter(id, callback) {
     });
 }
 
-// 6. ф-ция для поика по папке с пагинацией 
+// 6. ф-ция для поика по папке с пагинациеrq
 function getLettersByFolder(folder, options = {} , callback) {
     const db = new sqlite3.Database('./database/mail.db');
 

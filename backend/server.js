@@ -105,7 +105,7 @@ app.get('/api/folders/:folderName', (req, res) => {
  if (error) {
  res.status(500).json({
  success: false,
- error: 'Ошибка получения писем'
+ error: 'Ошибка при получении писем'
  });
  } else {
  // Подсчет непрочитанных
