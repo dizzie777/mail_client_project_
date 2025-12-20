@@ -131,7 +131,7 @@ async function loadInitialData() {
     }
   } catch (error) {
     console.error("Ошибка загрузки писем:", error);
-    showError(`Не удалось загрузить письма: ${error.message}`);
+    showError(`Письма не могут быть загружены: ${error.message}`);
     hideLoading();
   }
 }
@@ -298,10 +298,10 @@ function displayLetterContent(letter) {
   document.getElementById("letter-subject").textContent =
     letter.subject || "Без темы";
   document.getElementById("letter-from").textContent = `${
-    letter.from_email || letter.sender_email || "Неизвестный отправитель"
+    letter.from_email || letter.sender_email || "Анонимный отправитель"
   }`;
   document.getElementById("letter-to").textContent =
-    letter.recipient_email || letter.to_email || "Неизвестный получатель";
+    letter.recipient_email || letter.to_email || "Анонимный получатель";
   document.getElementById("letter-date").textContent = formatDate(
     letter.date || letter.created_at
   );
@@ -309,7 +309,7 @@ function displayLetterContent(letter) {
     letter.folder
   );
   document.getElementById("letter-body").textContent =
-    letter.body || "Текст письма отсутствует";
+    letter.body || "Нет текста";
 
   // Обновляем бейджи
   updateLetterBadges(letter);
