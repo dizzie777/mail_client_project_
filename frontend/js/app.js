@@ -100,7 +100,14 @@ function setupEventListeners() {
     });
   }
   //6. Форма нов письма
-  setupNewLetterForm();
+  //setupNewLetterForm();
+  //добавляем обработчик на кнопку ОТПРАВИТЬ в форме
+  document
+    .getElementById("send-letter-btn")
+    ?.addEventListener("click", async function (e) {
+      e.preventDefault();
+      await sendNewLetter();
+    });
 }
 
 // Загрузка начальных данных
@@ -311,11 +318,11 @@ function displayLetterContent(letter) {
   document.getElementById("letter-body").textContent =
     letter.body || "Нет текста";
 
-  // Обновляем бейджи
+  // Обновляем бейджи (расширенный вид)
   updateLetterBadges(letter);
 
   // Настраиваем кнопки действий
-  setupLetterActionButtons(letter.id);
+  setupLetterActionButtons(letter.id, letter);
 }
 
 // Пометить письмо как прочитанное
@@ -339,16 +346,20 @@ async function markAsRead(letterId, element) {
   }
 }
 
-// Обновление статистики
+//Обновление статистики
 function updateStatistics(letters) {
   const total = letters.length;
   const unread = letters.filter((l) => l.is_read === 0).length;
-  const inbox = letters.filter((l) => l.folder === "inbox").length;
-  const sent = letters.filter((l) => l.folder === "sent").length;
+  const inbox = letters.filter((l) => l.folder === "Входящие").length;
+  const sent = letters.filter((l) => l.folder === "Отправленные").length;
+  const draft = letters.filter((l) => l.folder === "черновики").length;
+  const trash = letters.filter((l) => l.folder === "корзина").length;
 
   // Обновляем счетчики в папках
   updateFolderCount("inbox", inbox);
   updateFolderCount("sent", sent);
+  updateFolderCount("корзина", trash);
+  updateFolderCount("черновики", draft);
 
   // Обновляем общую статистику
   const statsElement = document.querySelector(".card-body");
@@ -397,47 +408,55 @@ function updateLetterBadges(letter) {
   }
 }
 
-// Настройка кнопок действий для письма
-function setupLetterActionButtons(letterId) {
-  // Кнопка "Удалить"
-  const deleteBtn = document.querySelector(
-    "#letter-content .btn-outline-danger"
+// Настройка кнопок действий для письма (вариант 2)
+function setupLetterActionButtons(letterId, letterData) {
+  // Находим контейнер для кнопок
+  const buttonContainer = document.querySelector(
+    "#letter-content .d-flex.gap2"
   );
-  if (deleteBtn) {
-    deleteBtn.onclick = async () => {
-      if (confirm("Переместить письмо в корзину?")) {
-        try {
-          await api.deleteLetter(letterId);
-          showSuccess("Письмо перемещено в корзину");
-          await refreshLetters();
-          resetLetterSelection();
-        } catch (error) {
-          showError("Не удалось удалить письмо");
-        }
-      }
-    };
-  }
-
-  // Кнопка "Пометить как прочитанное/непрочитанное"
+  if (!buttonContainer) return;
+  // Очищаем контейнер
+  buttonContainer.innerHTML = "";
+  // Создаем новые кнопки
+  // Кнопка "Ответить" (День 7)
+  const replyBtn = document.createElement("button");
+  replyBtn.className = "btn btn-primary";
+  replyBtn.innerHTML = '<i class="bi bi-reply me-1"></i> Ответить';
+  replyBtn.addEventListener("click", () => {
+    replyToLetter(letterData);
+  });
+  buttonContainer.appendChild(replyBtn);
+  // 1. Кнопка "Пометить как прочитанное/непрочитанное"
   const toggleReadBtn = document.createElement("button");
   toggleReadBtn.className = "btn btn-outline-secondary";
-  toggleReadBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Прочитано';
-
-  // Можно добавить логику для определения текущего статуса
-  // и изменения текста кнопки
-
-  const buttonContainer = document.querySelector(
-    "#letter-content .d-flex.gap-2"
-  );
-  if (
-    buttonContainer &&
-    !buttonContainer.querySelector(".btn-outline-secondary:not(.ms-auto)")
-  ) {
-    buttonContainer.insertBefore(
-      toggleReadBtn,
-      buttonContainer.querySelector(".ms-auto")
-    );
-  }
+  toggleReadBtn.innerHTML =
+    letterData.is_read === 1
+      ? '<i class="bi bi-check-circle me-1"></i> Прочитано'
+      : '<i class="bi bi-envelope me-1"></i> Непрочитано';
+  toggleReadBtn.addEventListener("click", async () => {
+    await toggleReadStatus(letterId);
+  });
+  buttonContainer.appendChild(toggleReadBtn);
+  // 2. Кнопка "Переслать"
+  const forwardBtn = document.createElement("button");
+  forwardBtn.className = "btn btn-outline-primary";
+  forwardBtn.innerHTML = '<i class="bi bi-forward me-1"></i> Переслать';
+  forwardBtn.addEventListener("click", () => {
+    forwardLetter(letterData);
+  });
+  buttonContainer.appendChild(forwardBtn);
+  // 3. Гибкая панель (пустой div для выравнивания)
+  const spacer = document.createElement("div");
+  spacer.className = "ms-auto";
+  buttonContainer.appendChild(spacer);
+  // 4. Кнопка "Удалить" (День-7)
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "btn btn-outline-danger";
+  deleteBtn.innerHTML = '<i class="bi bi-trash me-1"></i> Удалить';
+  deleteBtn.addEventListener("click", () => {
+    deleteLetter(letterId);
+  });
+  buttonContainer.appendChild(deleteBtn);
 }
 
 // Обновление всех писем
@@ -474,6 +493,13 @@ function showNewLetterForm() {
   document.getElementById("new-letter-form").style.display = "block";
   document.getElementById("letter-content").style.display = "none";
   document.getElementById("no-letter-selected").style.display = "none";
+
+  //фокус на первое поле
+  setTimeout(() => {
+    document.getElementById("new-to-email").focus();
+  }, 100);
+
+  //прокуртка к форме
   document
     .getElementById("new-letter-form")
     .scrollIntoView({ behavior: "smooth" });
@@ -482,7 +508,6 @@ function showNewLetterForm() {
 // Скрыть форму нового письма
 function hideNewLetterForm() {
   document.getElementById("new-letter-form").style.display = "none";
-
   if (currentLetterId) {
     document.getElementById("letter-content").style.display = "block";
   } else {
@@ -644,39 +669,296 @@ function hideLoading() {
     loader.style.display = "none";
   }
 }
+
 // Обработка формы нового письма
 function setupNewLetterForm() {
   const form = document.querySelector("#new-letter-form form");
-  const saveDraftBtn = document.getElementById("save-draft-btn");
-
   if (form) {
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
-
+      const toEmail = document.getElementById("new-to-email").value.trim();
+      const subject = document.getElementById("new-subject").value.trim();
+      const body = document.getElementById("new-body").value.trim();
+      // Валидация
+      if (!toEmail || !toEmail.includes("@")) {
+        showError("Введите корректный email адрес");
+        document.getElementById("new-to-email").focus();
+        return;
+      }
+      if (!subject) {
+        showError("Введите тему письма");
+        document.getElementById("new-subject").focus();
+        return;
+      }
+      if (!body) {
+        showError("Введите текст письма");
+        document.getElementById("new-body").focus();
+        return;
+      }
       const formData = {
-        to_email: this.querySelector('[type="email"]').value,
-        subject: this.querySelector('[type="text"]').value,
-        body: this.querySelector("textarea").value,
+        to_email: toEmail,
+        subject: subject,
+        body: body,
+        folder: "Отправленные",
+        from_email: "student@college.ru", // Можно сделать динамическим
       };
-
+      showLoading("Отправка письма...");
       try {
         const result = await api.createLetter(formData);
-        if (result.success) {
+        if (result && result.success) {
           showSuccess("Письмо успешно отправлено!");
-          this.reset();
+          // Очищаем форму
+          clearNewLetterForm();
           hideNewLetterForm();
+          // Обновляем список писем
+          api.clearCacheForEndpoint("/letters");
           await refreshLetters();
+          // Переходим в отправленные
+          await selectFolder("Отправленные");
+        } else {
+          throw new Error(result.error || "Ошибка отправки");
         }
       } catch (error) {
+        console.error("Ошибка отправки:", error);
         showError(`Ошибка отправки: ${error.message}`);
+      } finally {
+        hideLoading();
       }
     });
   }
-
+  // Кнопка "Сохранить черновик"
+  const saveDraftBtn = document.getElementById("save-draft-btn");
   if (saveDraftBtn) {
     saveDraftBtn.addEventListener("click", async function () {
-      showSuccess("Черновик сохранен!");
-      // Здесь можно добавить логику сохранения в localStorage
+      const toEmail = document.getElementById("new-to-email").value.trim();
+      const subject = document.getElementById("new-subject").value.trim();
+      const body = document.getElementById("new-body").value.trim();
+      // Для черновика все поля не обязательны
+      if (!subject && !body) {
+        showError("Черновик не может быть пустым");
+        return;
+      }
+      const letterData = {
+        to_email: toEmail || "",
+        subject: subject || "Черновик",
+        body: body || "",
+        folder: "Черновики",
+        is_read: 1,
+      };
+      showLoading("Сохранение черновика...");
+      try {
+        const response = await api.createLetter(letterData);
+        if (response && response.success) {
+          showSuccess("Черновик сохранен!");
+          clearNewLetterForm();
+          hideNewLetterForm();
+          // Обновляем список и переходим в черновики
+          api.clearCacheForEndpoint("/letters");
+          await refreshLetters();
+          await selectFolder("Черновики");
+        }
+      } catch (error) {
+        console.error("Ошибка сохранения черновика:", error);
+        showError("Не удалось сохранить черновик");
+      } finally {
+        hideLoading();
+      }
     });
   }
+}
+// Очистка формы нового письма
+function clearNewLetterForm() {
+  document.getElementById("new-to-email").value = "";
+  document.getElementById("new-subject").value = "";
+  document.getElementById("new-body").value = "";
+}
+
+async function sendNewLetter() {
+  const toEmail = document.getElementById("new-to-email").value.trim();
+  const subject = document.getElementById("new-subject").value.trim();
+  const body = document.getElementById("new-body").value.trim();
+  // Валидация
+  if (!toEmail || !toEmail.includes("@")) {
+    showError("Введите корректный email адрес");
+    document.getElementById("new-to-email").focus();
+    return;
+  }
+  if (!subject) {
+    showError("Введите тему письма");
+    document.getElementById("new-subject").focus();
+    return;
+  }
+  if (!body) {
+    showError("Введите текст письма");
+    document.getElementById("new-body").focus();
+    return;
+  }
+  showLoading("Отправка письма...");
+  try {
+    const response = await api.createLetter({
+      to_email: toEmail,
+      subject: subject,
+      body: body,
+      folder: "Отправленные",
+      from_email: "student@college.ru",
+    });
+    if (response && response.success) {
+      showSuccess("Письмо успешно отправлено!");
+      // Очищаем форму
+      clearNewLetterForm();
+      hideNewLetterForm();
+      // Обновляем список писем
+      api.clearCacheForEndpoint("/letters");
+      await refreshLetters();
+      // Переходим в отправленные
+      await selectFolder("Отправленные");
+    }
+  } catch (error) {
+    console.error("Ошибка отправки:", error);
+    showError(`Ошибка отправки: ${error.message}`);
+  } finally {
+    hideLoading();
+  }
+}
+
+//пререключение статуса прочитанности
+async function toggleReadStatus(letterId) {
+  //полоуч текущ письмо чоб узнать его статус
+  try {
+    const response = await api.getLetterById(letterId);
+    if (response && response.success) {
+      const currentLetter = response.data;
+      const newStatus = currentLetter.is_read === 0 ? 1 : 0;
+
+      showLoading("Обновление статуса...");
+
+      const updateResponse = await api.updateLetter(letterId, {
+        is_read: newStatus,
+      });
+
+      if (updateResponse && updateResponse.success) {
+        showSuccess(
+          newStatus === 1
+            ? "Письмо помечено как прорчитанноое"
+            : "письмо помечено как непрочитанное"
+        );
+
+        //обновляем текущее письмо
+        await loadLetterContent(letterId);
+
+        //обнолвяем список писем
+        api.clearCacheForEndpoint("/letters");
+        await refreshLetters();
+
+        //обновляем сттатистику
+        await refreshStatistics();
+      }
+    }
+  } catch (error) {
+    console.error(`Ошибка переключения статуса письма ${letterId}:`, error);
+    showError("не удалось изменить статус письма");
+  } finally {
+    hideLoading();
+  }
+}
+
+// Удаление письма (перемещение в корзину)
+async function deleteLetter(letterId) {
+  if (!letterId) {
+    showError("Не выбрано письмо для удаления");
+    return;
+  }
+  // Подтверждение удаления
+  if (
+    !confirm(
+      "Вы уверены, что хотите удалить это письмо? Оно будет перемещенов корзину."
+    )
+  ) {
+    return;
+  }
+  showLoading("Удаление письма...");
+  try {
+    // Отправляем DELETE запрос
+    const response = await api.deleteLetter(letterId);
+    if (response && response.success) {
+      showSuccess("Письмо перемещено в корзину");
+      // Очищаем кэш и обновляем список
+      api.clearCacheForEndpoint("/letters");
+      await refreshLetters();
+      // Сбрасываем выбранное письмо
+      resetLetterSelection();
+      // Обновляем статистику
+      await refreshStatistics();
+      // Если мы находимся в папке "Корзина", обновляем её
+      if (currentFolder === "Корзина") {
+        await loadLettersFromFolder("Корзина");
+      }
+    } else {
+      throw new Error(response.error || "Ошибка удаления");
+    }
+  } catch (error) {
+    console.error(`Ошибка удаления письма ${letterId}:`, error);
+    showError(`Не удалось удалить письмо: ${error.message}`);
+  } finally {
+    hideLoading();
+  }
+}
+
+// Ответить на письмо
+function replyToLetter(letterData) {
+  showNewLetterForm();
+  // Заполняем форму данными из письма
+  const toEmail = document.getElementById("new-to-email");
+  const subject = document.getElementById("new-subject");
+  const body = document.getElementById("new-body");
+  // Определяем адрес для ответа
+  const replyTo = letterData.from_email || letterData.sender_email || "";
+  toEmail.value = replyTo;
+  // Добавляем Re: к теме, если его еще нет
+  const originalSubject = letterData.subject || "";
+  if (!originalSubject.toLowerCase().startsWith("re:")) {
+    subject.value = `Re: ${originalSubject}`;
+  } else {
+    subject.value = originalSubject;
+  }
+  // Добавляем цитату оригинального письма
+  const originalBody = letterData.body || "";
+  const quote = `\n\n---\n${originalBody.substring(0, 500)}${
+    originalBody.length > 500 ? "..." : ""
+  }`;
+  body.value = `Здравствуйте!\n\n${quote}`;
+  // Фокус на тело письма
+  setTimeout(() => {
+    body.focus();
+    body.setSelectionRange(0, 0);
+  }, 100);
+}
+
+// Переслать письмо
+function forwardLetter(letterData) {
+  showNewLetterForm();
+  const toEmail = document.getElementById("new-to-email");
+  const subject = document.getElementById("new-subject");
+  const body = document.getElementById("new-body");
+  // Очищаем поле "Кому"
+  toEmail.value = "";
+  // Добавляем Fw: к теме
+  const originalSubject = letterData.subject || "";
+  if (
+    !originalSubject.toLowerCase().startsWith("fw:") &&
+    !originalSubject.toLowerCase().startsWith("fwd:")
+  ) {
+    subject.value = `Fwd: ${originalSubject}`;
+  } else {
+    subject.value = originalSubject;
+  }
+  // Добавляем информацию о пересылаемом письме
+  const forwardInfo = `\n\n--- Пересылаемое письмо ---\n`;
+  const fromInfo = `От: ${letterData.from_email || letterData.sender_email}\n`;
+  const dateInfo = `Дата: ${formatDate(
+    letterData.date || letterData.created_at
+  )}\n`;
+  const subjectInfo = `Тема: ${letterData.subject}\n`;
+  const bodyContent = `\n${letterData.body || ""}`;
+  body.value = forwardInfo + fromInfo + dateInfo + subjectInfo + bodyContent;
 }
