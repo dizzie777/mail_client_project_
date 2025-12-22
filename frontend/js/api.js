@@ -186,7 +186,7 @@ class MailApi { // ИЗМЕНИТЕ MainAPI на MailApi
      */
     async checkServerHealth() {
         try {
-            await fetch("http://localhost:3000/");
+            await fetch("http://localhost:3000/", {method: 'HEAD' });
             return true;
         } catch (error) {
             return false;

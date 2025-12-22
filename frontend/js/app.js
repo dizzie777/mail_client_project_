@@ -101,10 +101,8 @@ function setupEventListeners() {
   }
   //6. Форма нов письма
   //setupNewLetterForm();
-  //добавляем обработчик на кнопку ОТПРАВИТЬ в форме
-  document
-    .getElementById("send-letter-btn")
-    ?.addEventListener("click", async function (e) {
+  // добавл обработчпк на кнопку "отправить" в форме
+  document.getElementById("send-letter-btn")?.addEventListener("click", async function (e) {
       e.preventDefault();
       await sendNewLetter();
     });
@@ -138,7 +136,7 @@ async function loadInitialData() {
     }
   } catch (error) {
     console.error("Ошибка загрузки писем:", error);
-    showError(`Письма не могут быть загружены: ${error.message}`);
+    showError(`Не удалось загрузить письма: ${error.message}`);
     hideLoading();
   }
 }
@@ -230,11 +228,13 @@ async function loadLettersFromFolder(folder) {
 
   try {
     const response = await api.getLetters(folder);
-
     if (response && response.success) {
       allLetters = response.data;
       displayLetters(allLetters);
+
+      //const resStat = await api.getLetters() 
       updateStatistics(response.data);
+      //await refreshStatistics();
 
       // Сбрасываем выбранное письмо
       resetLetterSelection();
@@ -305,10 +305,10 @@ function displayLetterContent(letter) {
   document.getElementById("letter-subject").textContent =
     letter.subject || "Без темы";
   document.getElementById("letter-from").textContent = `${
-    letter.from_email || letter.sender_email || "Анонимный отправитель"
+    letter.from_email || letter.sender_email || "Неизвестный отправитель"
   }`;
   document.getElementById("letter-to").textContent =
-    letter.recipient_email || letter.to_email || "Анонимный получатель";
+    letter.recipient_email || letter.to_email || "Неизвестный получатель";
   document.getElementById("letter-date").textContent = formatDate(
     letter.date || letter.created_at
   );
@@ -316,9 +316,9 @@ function displayLetterContent(letter) {
     letter.folder
   );
   document.getElementById("letter-body").textContent =
-    letter.body || "Нет текста";
+    letter.body || "Текст письма отсутствует";
 
-  // Обновляем бейджи (расширенный вид)
+  // Обновляем бейджи
   updateLetterBadges(letter);
 
   // Настраиваем кнопки действий
@@ -346,20 +346,22 @@ async function markAsRead(letterId, element) {
   }
 }
 
-//Обновление статистики
+// Обновление статистики
 function updateStatistics(letters) {
   const total = letters.length;
-  const unread = letters.filter((l) => l.is_read === 0).length;
-  const inbox = letters.filter((l) => l.folder === "Входящие").length;
-  const sent = letters.filter((l) => l.folder === "Отправленные").length;
-  const draft = letters.filter((l) => l.folder === "черновики").length;
-  const trash = letters.filter((l) => l.folder === "корзина").length;
-
+  const unread = letters.filter(l => l.is_read === 0).length;
+  const inbox = letters.filter(l => l.folder === "Входящие").length;
+  const sent = letters.filter(l => l.folder === "Отправленные").length;
+  const draft = letters.filter(l => l.folder === "Черновики").length;
+  const trash = letters.filter(l => l.folder === "Корзина").length;
+  
   // Обновляем счетчики в папках
-  updateFolderCount("inbox", inbox);
-  updateFolderCount("sent", sent);
-  updateFolderCount("корзина", trash);
-  updateFolderCount("черновики", draft);
+  updateFolderCount("Входящие", inbox);
+  updateFolderCount("Отправленные", sent);
+  updateFolderCount("Корзина", trash);
+  updateFolderCount("Черновики", draft);
+
+  console.log(`Вход ${inbox}, Отправленные ${sent}, Корзина ${trash}`);
 
   // Обновляем общую статистику
   const statsElement = document.querySelector(".card-body");
@@ -411,9 +413,7 @@ function updateLetterBadges(letter) {
 // Настройка кнопок действий для письма (вариант 2)
 function setupLetterActionButtons(letterId, letterData) {
   // Находим контейнер для кнопок
-  const buttonContainer = document.querySelector(
-    "#letter-content .d-flex.gap2"
-  );
+  const buttonContainer = document.querySelector("#letter-content .d-flex.gap2");
   if (!buttonContainer) return;
   // Очищаем контейнер
   buttonContainer.innerHTML = "";
@@ -429,10 +429,9 @@ function setupLetterActionButtons(letterId, letterData) {
   // 1. Кнопка "Пометить как прочитанное/непрочитанное"
   const toggleReadBtn = document.createElement("button");
   toggleReadBtn.className = "btn btn-outline-secondary";
-  toggleReadBtn.innerHTML =
-    letterData.is_read === 1
-      ? '<i class="bi bi-check-circle me-1"></i> Прочитано'
-      : '<i class="bi bi-envelope me-1"></i> Непрочитано';
+  toggleReadBtn.innerHTML = letterData.is_read === 1? 
+      '<i class="bi bi-check-circle me-1"></i> Прочитано' : 
+      '<i class="bi bi-envelope me-1"></i> Непрочитано';
   toggleReadBtn.addEventListener("click", async () => {
     await toggleReadStatus(letterId);
   });
@@ -494,12 +493,10 @@ function showNewLetterForm() {
   document.getElementById("letter-content").style.display = "none";
   document.getElementById("no-letter-selected").style.display = "none";
 
-  //фокус на первое поле
   setTimeout(() => {
     document.getElementById("new-to-email").focus();
   }, 100);
 
-  //прокуртка к форме
   document
     .getElementById("new-letter-form")
     .scrollIntoView({ behavior: "smooth" });
@@ -508,6 +505,7 @@ function showNewLetterForm() {
 // Скрыть форму нового письма
 function hideNewLetterForm() {
   document.getElementById("new-letter-form").style.display = "none";
+
   if (currentLetterId) {
     document.getElementById("letter-content").style.display = "block";
   } else {
@@ -670,7 +668,7 @@ function hideLoading() {
   }
 }
 
-// Обработка формы нового письма
+// Обработка формы нового письма (исправленная версия)
 function setupNewLetterForm() {
   const form = document.querySelector("#new-letter-form form");
   if (form) {
@@ -840,7 +838,7 @@ async function toggleReadStatus(letterId) {
         showSuccess(
           newStatus === 1
             ? "Письмо помечено как прорчитанноое"
-            : "письмо помечено как непрочитанное"
+            : "письмо помено как непрочитанное"
         );
 
         //обновляем текущее письмо
@@ -855,7 +853,7 @@ async function toggleReadStatus(letterId) {
       }
     }
   } catch (error) {
-    console.error(`Ошибка переключения статуса письма ${letterId}:`, error);
+    console.error(`Ощибка перключения статуса письма ${letterId}:`, error);
     showError("не удалось изменить статус письма");
   } finally {
     hideLoading();
@@ -870,10 +868,7 @@ async function deleteLetter(letterId) {
   }
   // Подтверждение удаления
   if (
-    !confirm(
-      "Вы уверены, что хотите удалить это письмо? Оно будет перемещенов корзину."
-    )
-  ) {
+    !confirm("Вы уверены, что хотите удалить это письмо? Оно будет перемещено в корзину.")) {
     return;
   }
   showLoading("Удаление письма...");
@@ -882,17 +877,21 @@ async function deleteLetter(letterId) {
     const response = await api.deleteLetter(letterId);
     if (response && response.success) {
       showSuccess("Письмо перемещено в корзину");
+
       // Очищаем кэш и обновляем список
       api.clearCacheForEndpoint("/letters");
       await refreshLetters();
       // Сбрасываем выбранное письмо
       resetLetterSelection();
+
       // Обновляем статистику
       await refreshStatistics();
+
       // Если мы находимся в папке "Корзина", обновляем её
       if (currentFolder === "Корзина") {
         await loadLettersFromFolder("Корзина");
       }
+
     } else {
       throw new Error(response.error || "Ошибка удаления");
     }
@@ -923,9 +922,7 @@ function replyToLetter(letterData) {
   }
   // Добавляем цитату оригинального письма
   const originalBody = letterData.body || "";
-  const quote = `\n\n---\n${originalBody.substring(0, 500)}${
-    originalBody.length > 500 ? "..." : ""
-  }`;
+  const quote = `\n\n---\n${originalBody.substring(0, 500)}${originalBody.length > 500 ? "..." : ""}`;
   body.value = `Здравствуйте!\n\n${quote}`;
   // Фокус на тело письма
   setTimeout(() => {
@@ -955,9 +952,7 @@ function forwardLetter(letterData) {
   // Добавляем информацию о пересылаемом письме
   const forwardInfo = `\n\n--- Пересылаемое письмо ---\n`;
   const fromInfo = `От: ${letterData.from_email || letterData.sender_email}\n`;
-  const dateInfo = `Дата: ${formatDate(
-    letterData.date || letterData.created_at
-  )}\n`;
+  const dateInfo = `Дата: ${formatDate(letterData.date || letterData.created_at)}\n`;
   const subjectInfo = `Тема: ${letterData.subject}\n`;
   const bodyContent = `\n${letterData.body || ""}`;
   body.value = forwardInfo + fromInfo + dateInfo + subjectInfo + bodyContent;
