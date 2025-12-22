@@ -92,13 +92,26 @@ function setupEventListeners() {
     cancelBtn.addEventListener("click", hideNewLetterForm);
   }
 
-  // 5. Поиск
+  /*// 5. Поиск
   const searchInput = document.querySelector(".search-box input");
   if (searchInput) {
     searchInput.addEventListener("input", function (e) {
       filterLettersBySearch(this.value);
     });
-  }
+  }*/
+
+// 5. Поиск (исправление День- 8)
+    const searchInput = document.querySelector('.search-box input');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function(e) {
+            cleearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterLettersBySearch(this.value);
+            }, 300); //задержка 300мс
+        });
+    }
+
   //6. Форма нов письма
   //setupNewLetterForm();
   // добавл обработчпк на кнопку "отправить" в форме
@@ -120,7 +133,8 @@ async function loadInitialData() {
       allLetters = response.data;
 
       // Отображаем письма
-      displayLetters(allLetters);
+      //displayLetters(allLetters);
+      displayLettersWithPagination();
 
       // Обновляем статистику
       updateStatistics(response.data);
@@ -230,7 +244,8 @@ async function loadLettersFromFolder(folder) {
     const response = await api.getLetters(folder);
     if (response && response.success) {
       allLetters = response.data;
-      displayLetters(allLetters);
+      //displayLetters(allLetters);
+      displayLettersWithPagination(); 
 
       //const resStat = await api.getLetters() 
       updateStatistics(response.data);
@@ -464,6 +479,142 @@ async function refreshLetters() {
   await loadInitialData();
 }
 
+ let currentPage = 1;
+    const LETTERS_PER_PAGE = 10;
+    let isLoading = false;
+
+    //Функции ленивой загрузки
+    async function loadMoreLetters() {
+        if (isLoading || !allLetters || allLetters.length === 0) return;
+
+        isLoading = true;
+        showLoading('Загрузка дополнительных писем...');
+        
+        try {
+            currentPage++;
+            const startIndex = (currentPage - 1) * LETTERS_PER_PAGE;
+            const endIndex = startIndex + LETTERS_PER_PAGE;
+
+            //Отображаем след порцию писем
+            const lettersToShow = allLetters.slice(startIndex, endIndex);
+
+            if (lettersToShow.length > 0) {
+                displayLetters(lettersToShow);
+                setupPagination();
+            } else {
+                showInfo('Все пиьсма загружены');
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки писем:', error);
+            showError('Не удалось загрузить письма');
+        } finally {
+            isLoading = false;
+            hideLoading();
+        }
+    }
+
+    // Обновленная функция отображения писем с пагинацией 
+    function displayLettersWithPagination(letters) {
+        allLetters = letters;
+        currentPage = 1;
+
+        const startIndex = (currentPage - 1) * LETTERS_PER_PAGE;
+        const endIndex = startIndex +LETTERS_PER_PAGE;
+        const lettersToShow = allLetters.slice(startIndex, endIndex);
+
+        displayLetters(lettersToShow);
+        setupPagination();
+    }
+
+    // Настройка пагинации
+    function setupPagination() {
+        const totalPages = Math.ceil(allLetters.length / LETTERS_PER_PAGE);
+        const paginationContainer = document.querySelector('.pagination');
+
+        if (!paginationContainer) return;
+
+        if (totalPages <= 1) {
+            paginationContainer.style.display = 'none';
+            return;
+        }
+
+        paginationContainer.style.display = 'flex';
+
+        let paginationHTML = `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" id="prev-page">Назад</a>
+            </li>
+        `; 
+    }
+
+    // Показыаем до 5 страниц
+    for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+        paginationHTML += `
+            <li class="page-item ${currentPage === 1 ? 'active' : ''}">
+                <a class="page-link page-number href="#" data-
+                page="${i}">${i}</a>
+            </li>
+        `; 
+    }
+    
+    if (totalPages > 5) {
+        paginationHTML += `
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+            <li class="page-item">
+                <a class="page-link page-number href="#" data-
+                page="${totalPages}">${totalPages}</a> 
+            </li>
+        `; 
+    }
+
+    paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" id="next-page">Вперед</a> 
+        </li>
+        `;
+
+    paginationContainer.innerHTML = paginationHTML;
+
+    //Обработчики событий
+    document.getElementById('prev-page')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentPage > 1) {
+            currentPage--;
+            updateDisplayedLetters();
+        }
+    });
+
+    document.getElementById('next-page')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentPage < totalPages) {
+            currentPage++;
+            updateDisplayedLetters();
+        }
+    });
+
+    document.querySelectorAll('.page-number').forEach(link => {
+        link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = parseInt(e.target.dataset.page);
+        if (page !== currentPage) {
+            currentPage = page;
+            updateDisplayedLetters();
+        }
+    });
+});
+
+function updateDisplayedLetters() {
+    const startIndex = (currentPage - 1) * LETTERS_PER_PAGE;
+    const endIndex = startIndex + LETTERS_PER_PAGE;
+    const lettersToShow = allLetters.slice(startIndex, endIndex);
+
+    displayLetters(lettersToShow);
+    setupPagination();
+}
+
+
 // Обновление статистики
 async function refreshStatistics() {
   try {
@@ -517,7 +668,8 @@ function hideNewLetterForm() {
 function filterLettersBySearch(searchTerm) {
   if (!searchTerm.trim()) {
     // Если поиск пустой, показываем все письма
-    displayLetters(allLetters);
+    //displayLetters(allLetters);
+    displayLettersWithPagination(); 
     return;
   }
 

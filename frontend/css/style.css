@@ -158,3 +158,34 @@ body {
 footer {
   margin-top: auto;
 }
+
+
+
+/*добавленный код Диана писаа 89пз*/
+/* СТРАНИЦА 15 КСС */
+.letter-item {
+    transition: transform 0.2s;
+    will-change: transform;
+}
+
+.card, .list-group-item {
+    transform: translateZ(0);
+}
+
+.unread {
+    backface-visibility: hidden;
+}
+
+body {
+    font-display: swap;
+}
+
+@media (max-width: 768px) {
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .list-group-item {
+        touch-action: manipulation;
+    }
+}

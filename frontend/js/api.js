@@ -7,7 +7,14 @@ class MailApi { // ИЗМЕНИТЕ MainAPI на MailApi
     constructor() {
         this.baseUrl = Config.API_BASE_URL;
         this.cache = new Map(); // Простое кэширование
-        this.requestQueue = []; // Очередь запросов
+        this.requestQueue = new Map(); // Очередь запросов
+
+        // Добавить метод для группировки запросов 
+            async function batchRequests(endpoints) { 
+            const promises = endpoints.map(endpoint => this.fetchData(endpoint)); 
+            return Promise.all(promises); 
+            } 
+            
     }
 
     /*
@@ -19,6 +26,13 @@ class MailApi { // ИЗМЕНИТЕ MainAPI на MailApi
     async fetchData(endpoint, options = {}) {
         const url = `${this.baseUrl}${endpoint}`;
         const cacheKey = `${url}|${JSON.stringify(options)}`;
+
+        // В fetchData добавить проверку на дублирующиеся запросы 
+            const isDuplicate = this.requestQueue.has(cacheKey); 
+            if (isDuplicate) { 
+            console.log(`📦 Используем существующий запрос: ${endpoint}`); 
+            return this.requestQueue.get(cacheKey); 
+            } 
 
         // Проверка кэша
         const cached = this.cache.get(cacheKey);

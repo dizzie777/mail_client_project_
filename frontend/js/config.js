@@ -35,5 +35,10 @@ const Config = {
   RETRY_DELAY: 1000, // Задержка между попытками (1 секунда)
 };
 
+// проверка конфигурации при заугрузке
+console.log('Конфигурация API загружена:');
+console.log(`API URL: ${Config.API_BASE_URL}`);
+console.log(` Timeout: ${Config.REQUEST_TIMEOUT}ms`);
+
 // ДОБАВЬТЕ ЭТУ СТРОКУ:
 export default Config;
