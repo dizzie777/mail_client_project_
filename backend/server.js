@@ -28,6 +28,10 @@ function validateLetterData(data) {
     errors.push("Некорректный email получателя");
   }
 
+  if (!data.to_email || !data.to_email.includes(".ru")) {
+    errors.push("Некорректный email получателя");
+  }
+
   if (!data.subject || data.subject.trim().length < 2) {
     errors.push("Тема письма должна быть не короче 2 символов");
   }

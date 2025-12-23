@@ -1,191 +1,204 @@
-/* frontend/css/style.css */
-/* Стили для почтового клиента (День 6 - Динамика) */
+/* Обновленные стили для улучшения контрастности (Доступность WCAG AA) */
 
-/* Общие стили */
-body {
-  background-color: #f8f9fa;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+/* Шапка - улучшенный контраст */
+.navbar {
+  background-color: #0a58ca !important;
+  /* Более темный синий */
 }
 
-/* Шапка */
 .navbar-brand {
+  color: #ffffff !important;
   font-size: 1.3rem;
-}
-
-.search-box {
-  width: 300px;
-}
-
-/* непрочанные письма */
-.list-group-item.unread {
-  background-color: rgba(15, 111, 255, 0.05);
-  border-left: 4px solid #0d6efd;
-}
-
-.list-group-item.unread .mb-1 {
   font-weight: 600;
 }
 
+.navbar .form-control {
+  border-color: #ffffff;
+}
+
+/* Активные элементы меню */
 .list-group-item.active {
-  background-color: #0d6efd;
-  border-color: #1070ff;
+  background-color: #0a58ca !important;
+  /* Более темный синий */
+  border-color: #0a58ca !important;
+  color: #ffffff !important;
+  font-weight: 600;
 }
 
-/*СПИСОК писем*/
-.letter-list {
-  max-height: 500px;
-  overflow: auto;
+/* Кнопки с синим фоном */
+.btn-primary {
+  background-color: #0a58ca;
+  border-color: #0a58ca;
 }
 
-.letter-list .list-group-item {
-  border-left: none;
-  border-right: none;
-  padding: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #084298;
+  border-color: #084298;
 }
 
-.letter-list .list-group-item:hover {
-  background-color: rgba(0, 0, 0, 0.03);
-}
-
-.letter-list .list-group-item:first-child {
-  border-top: none;
-}
-
-.letter-list .list-group-item:last-child {
-  border-bottom: none;
-}
-
-/* область просмотра письма */
-#letter-content {
-  animation: fadeIn 0.3s ease-in;
-}
-
-#no-letter-selected {
-  color: #6c757d;
-  opacity: 0.7;
-}
-
-/*анимиция*/
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/*пагинация*/
-.pagination {
-  margin-bottom: 0;
-}
-
-/*карточки*/
+/* Карточки и границы */
 .card {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s;
-}
-
-.card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  border: 1px solid #dee2e6;
 }
 
 .card-header {
+  font-weight: 600;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #0a58ca;
+  /* Акцентная линия */
+  color: #212529;
+}
+
+/* Ссылки */
+a {
+  color: #0a58ca;
   font-weight: 500;
 }
 
-/*статус сервера*/
+a:hover {
+  color: #084298;
+  text-decoration: underline;
+}
+
+/* Пагинация */
+.page-link {
+  color: #0a58ca;
+  border-color: #dee2e6;
+}
+
+.page-item.active .page-link {
+  background-color: #0a58ca;
+  border-color: #0a58ca;
+  color: #ffffff;
+}
+
+/* Статус сервера */
 #server-status {
   font-size: 0.85rem;
   padding: 0.35rem 0.7rem;
+  background-color: #0a58ca;
+  color: #ffffff;
+  border-radius: 4px;
+  font-weight: 500;
 }
 
-/* форма нового письма */
-#new-letter-form textarea {
-  resize: vertical;
-  min-height: 150px;
-}
-/*адаптивность*/
-@media (max-width: 768px) {
-  .search-box {
-    width: 100%;
-    margin-bottom: 10px;
-  }
-
-  .col-md-3,
-  .col-md-4,
-  .col-md-5 {
-    margin-bottom: 20px;
-  }
-
-  .letter-list {
-    max-height: 300px;
-  }
-
-  .btn-group .btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-  }
+/* Форма нового письма */
+#new-letter-form label {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 0.5rem;
 }
 
-/* подстветка актив пиьсма*/
+/* Подсветка активного письма */
 .list-group-item.active-letter {
-  background-color: #e3f2fd;
-  border-color: #bbdefb;
+  background-color: #e8f1ff;
+  /* Более контрастный фон */
+  border-left: 4px solid #0a58ca;
+  border-color: #cfe2ff;
+  font-weight: 500;
 }
 
-/* иконки в списке папок */
-.list-group-item i {
-  width: 20px;
-  text-align: center;
+/* Непрочитанные письма - улучшенный контраст */
+.list-group-item.unread {
+  background-color: #e8f1ff;
+  border-left: 4px solid #0a58ca;
 }
 
-/* улучшенные осттупы */
-.container-fluid {
-  padding-left: 15px;
-  padding-right: 15px;
+.list-group-item.unread .mb-1 {
+  font-weight: 700;
+  /* Жирнее для лучшей читаемости */
+  color: #212529;
 }
 
-/* футер */
+.list-group-item.unread .text-muted {
+  color: #495057 !important;
+  /* Меньше прозрачности */
+}
+
+/* Заголовки в письмах */
+h5,
+h6 {
+  color: #212529;
+  font-weight: 600;
+}
+
+/* Улучшенные тени для разделения */
+.list-group-item {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Фокус состояния для доступности */
+.btn:focus,
+.form-control:focus,
+.page-link:focus {
+  box-shadow: 0 0 0 0.25rem rgba(10, 88, 202, 0.25);
+  border-color: #0a58ca;
+  outline: none;
+}
+
+/* Улучшение контраста текста */
+.text-muted {
+  color: #6c757d !important;
+}
+
+.text-secondary {
+  color: #495057 !important;
+}
+
+/* Футер с лучшим контрастом */
 footer {
-  margin-top: auto;
+  background-color: #f8f9fa;
+  border-top: 2px solid #0a58ca;
+  padding: 1rem 0;
+  color: #495057;
+  font-weight: 500;
 }
 
+/* Темная тема для системных настроек */
+@media (prefers-color-scheme: dark) {
+  .navbar {
+    background-color: #084298 !important;
+  }
 
+  .list-group-item.active {
+    background-color: #084298 !important;
+  }
 
-/*добавленный код Диана писаа 89пз*/
-/* СТРАНИЦА 15 КСС */
-.letter-item {
-    transition: transform 0.2s;
-    will-change: transform;
+  .btn-primary {
+    background-color: #084298;
+  }
 }
 
-.card, .list-group-item {
-    transform: translateZ(0);
+/* Высокий контраст для пользователей с настройками */
+@media (prefers-contrast: high) {
+  .navbar {
+    background-color: #002d72 !important;
+  }
+
+  .list-group-item.active {
+    background-color: #002d72 !important;
+  }
+
+  .btn-primary {
+    background-color: #002d72;
+    border-color: #002d72;
+  }
+
+  .card-header {
+    border-bottom: 3px solid #002d72;
+  }
 }
 
-.unread {
-    backface-visibility: hidden;
-}
-
-body {
-    font-display: swap;
-}
-
+/* Улучшение для мобильных устройств */
 @media (max-width: 768px) {
-    * {
-        -webkit-tap-highlight-color: transparent;
-    }
+  .navbar {
+    background-color: #0a58ca !important;
+  }
 
-    .list-group-item {
-        touch-action: manipulation;
-    }
+  .search-box {
+    background-color: #ffffff;
+    border: 2px solid #0a58ca;
+  }
 }

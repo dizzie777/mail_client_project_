@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mail Client - Учебный проект</title>
+    <title>💌 Mail Client - Учебный проект</title>
     <!-- Bootstrap 5 CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -38,14 +38,19 @@
               type="text"
               class="form-control"
               placeholder="Поиск писем..."
+              aria-label="Поиск писем"
             />
-            <button class="btn btn-light" type="button">
+            <button class="btn btn-light" type="button" aria-label="Найти">
               <i class="bi bi-search"></i>
             </button>
           </div>
 
           <!-- Кнопка нового письма -->
-          <button class="btn btn-light ms-3" id="new-letter-btn">
+          <button
+            class="btn btn-light ms-3"
+            id="new-letter-btn"
+            aria-label="Новое письмо"
+          >
             <i class="bi bi-pencil-square me-1"></i> Новое письмо
           </button>
         </div>
@@ -56,6 +61,9 @@
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#mobileMenu"
+          aria-label="Открыть меню"
+          aria-expanded="false"
+          aria-controls="mobileMenu"
         >
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -66,12 +74,17 @@
     <div class="collapse d-lg-none bg-light border-bottom" id="mobileMenu">
       <div class="container py-3">
         <div class="input-group mb-3">
-          <input type="text" class="form-control" placeholder="Поиск..." />
-          <button class="btn btn-primary">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Поиск..."
+            aria-label="Поиск писем"
+          />
+          <button class="btn btn-primary" aria-label="Найти">
             <i class="bi bi-search"></i>
           </button>
         </div>
-        <button class="btn btn-primary w-100">
+        <button class="btn btn-primary w-100" aria-label="Новое письмо">
           <i class="bi bi-pencil-square me-2"></i> Новое письмо
         </button>
       </div>
@@ -144,11 +157,19 @@
             >
               <span><i class="bi bi-envelope me-2"></i>Письма</span>
               <div class="btn-group">
-                <button class="btn btn-sm btn-outline-secondary">
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  aria-label="Обновить"
+                >
                   <i class="bi bi-arrow-clockwise"></i>
+                  <span class="visually-hidden">Обновить</span>
                 </button>
-                <button class="btn btn-sm btn-outline-secondary">
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  aria-label="Фильтровать"
+                >
                   <i class="bi bi-filter"></i>
+                  <span class="visually-hidden">Фильтровать</span>
                 </button>
               </div>
             </div>
@@ -245,16 +266,34 @@
                     class="pagination pagination-sm justify-content-center mb-0"
                   >
                     <li class="page-item disabled">
-                      <a class="page-link" href="#">Назад</a>
+                      <a
+                        class="page-link"
+                        href="#"
+                        aria-label="Предыдущая страница"
+                        >Назад</a
+                      >
                     </li>
                     <li class="page-item active">
-                      <a class="page-link" href="#">1</a>
+                      <a
+                        class="page-link"
+                        href="#"
+                        aria-label="Страница 1"
+                        aria-current="page"
+                        >1</a
+                      >
                     </li>
                     <li class="page-item">
-                      <a class="page-link" href="#">2</a>
+                      <a class="page-link" href="#" aria-label="Страница 2"
+                        >2</a
+                      >
                     </li>
                     <li class="page-item">
-                      <a class="page-link" href="#">Вперед</a>
+                      <a
+                        class="page-link"
+                        href="#"
+                        aria-label="Следующая страница"
+                        >Вперед</a
+                      >
                     </li>
                   </ul>
                 </nav>
@@ -271,14 +310,26 @@
             >
               <span><i class="bi bi-eye me-2"></i>Просмотр письма</span>
               <div class="btn-group">
-                <button class="btn btn-sm btn-outline-primary">
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  aria-label="Ответить"
+                >
                   <i class="bi bi-reply"></i>
+                  <span class="visually-hidden">Ответить</span>
                 </button>
-                <button class="btn btn-sm btn-outline-primary">
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  aria-label="Переслать"
+                >
                   <i class="bi bi-forward"></i>
+                  <span class="visually-hidden">Переслать</span>
                 </button>
-                <button class="btn btn-sm btn-outline-danger">
+                <button
+                  class="btn btn-sm btn-outline-danger"
+                  aria-label="Удалить"
+                >
                   <i class="bi bi-trash"></i>
+                  <span class="visually-hidden">Удалить</span>
                 </button>
               </div>
             </div>
@@ -358,14 +409,22 @@
                 <div class="mb-4" id="letter-attachments" style="display: none">
                   <h6>Вложения:</h6>
                   <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action">
-                      <i class="bi bi-file-pdf me-2 text-danger"></i
-                      >задание_практика.pdf
+                    <a
+                      href="#"
+                      class="list-group-item list-group-item-action"
+                      aria-label="PDF файл"
+                    >
+                      <i class="bi bi-file-pdf me-2 text-danger"></i>
+                      задание_практика.pdf
                       <small class="text-muted ms-2">(1.2 MB)</small>
                     </a>
-                    <a href="#" class="list-group-item list-group-item-action">
-                      <i class="bi bi-file-image me-2 text-success"></i
-                      >Схема_БД.png
+                    <a
+                      href="#"
+                      class="list-group-item list-group-item-action"
+                      aria-label="Изображение"
+                    >
+                      <i class="bi bi-file-image me-2 text-success"></i>
+                      Схема_БД.png
                       <small class="text-muted ms-2">(450 KB)</small>
                     </a>
                   </div>
@@ -373,19 +432,7 @@
 
                 <!-- Кнопки действий -->
                 <div class="d-flex gap-2">
-                  <!-- <button class="btn btn-primary">
-                    <i class="bi bi-reply me-1"></i> Ответить
-                  </button>
-                  <button class="btn btn-outline-primary">
-                    <i class="bi bi-forward me-1"></i> Переслать
-                  </button>
-                  <button class="btn btn-outline-secondary">
-                    <i class="bi bi-archive me-1"></i> Архив
-                  </button>
-                  <button class="btn btn-outline-danger ms-auto">
-                    <i class="bi bi-trash me-1"></i> Удалить
-                  </button>
-                  -->
+                  <!-- Кнопки будут добавлены динамически -->
                 </div>
               </div>
             </div>
@@ -398,17 +445,21 @@
             <div class="card-body">
               <form>
                 <div class="mb-3">
-                  <label class="form-label">Кому:</label>
+                  <label for="new-to-email" class="form-label">Кому:</label>
                   <input
                     type="email"
                     class="form-control"
                     id="new-to-email"
                     placeholder="email@example.com"
                     required
+                    aria-describedby="emailHelp"
                   />
+                  <div id="emailHelp" class="visually-hidden">
+                    Введите email адрес получателя
+                  </div>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Тема:</label>
+                  <label for="new-subject" class="form-label">Тема:</label>
                   <input
                     type="text"
                     class="form-control"
@@ -418,7 +469,7 @@
                   />
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Текст письма:</label>
+                  <label for="new-body" class="form-label">Текст письма:</label>
                   <textarea
                     class="form-control"
                     rows="5"
@@ -428,14 +479,19 @@
                   ></textarea>
                 </div>
                 <div class="d-flex gap-2">
-                  <button type="submit" class="btn btn-success" 
-                    id="send-letter-btn">
+                  <button
+                    type="submit"
+                    class="btn btn-success"
+                    id="send-letter-btn"
+                    aria-label="Отправить письмо"
+                  >
                     <i class="bi bi-send me-1"></i>Отправить
                   </button>
                   <button
                     type="button"
                     class="btn btn-outline-secondary"
                     id="save-draft-btn"
+                    aria-label="Сохранить как черновик"
                   >
                     <i class="bi bi-save me-1"></i>Сохранить черновик
                   </button>
@@ -463,8 +519,8 @@
               Учебный проект "Почтовый клиент"
             </p>
             <small class="text-muted"
-              >Специальность: 09.02.07 Информационные системы и
-              программирование</small
+              >Специальность: 09.02.07 Информационные системы и программирование
+              <br />Зиганшина Галинурова</small
             >
           </div>
           <div class="col-md-6 text-md-end">
@@ -485,7 +541,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Подключение модулей -->
-     <!-- День8 (добавили defer для не критичных) -->
+    <!-- День8 (добавили defer для не критичных) -->
     <script type="module" src="js/config.js" defer></script>
     <script type="module" src="js/api.js" defer></script>
     <script type="module" src="js/app.js" defer></script>
